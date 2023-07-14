@@ -1,4 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
+import { Controller, useForm } from 'react-hook-form';
 import { VStack, Image, Text, Center, Heading, ScrollView } from 'native-base'
 
 import { AuthNavigatorRoutesProps } from '@routes/auth.routes'
@@ -9,16 +10,27 @@ import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 
 
+type FormData = {
+    email: string;
+    password: string;
+}
+
 export function SignIn() {
+
+    const { control, handleSubmit, formState: { errors } } = useForm<FormData>();
 
     const navigation = useNavigation<AuthNavigatorRoutesProps>();
 
-    function handleNewAccount(){
+    function handleNewAccount() {
         navigation.navigate('signUp')
     }
 
+    function handleSignIn({ email, password }: FormData) {
+        console.log(email, password)
+    }
+
     return (
-        <ScrollView contentContainerStyle={{flexGrow: 1}} showsVerticalScrollIndicator={false} >
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false} >
             <VStack flex={1} px={10}>
                 <Image
                     source={BackgoundImg}
@@ -43,17 +55,39 @@ export function SignIn() {
                         Acesso a conta
                     </Heading>
 
-                    <Input
-                        placeholder='E-mail'
-                        keyboardType='email-address'
-                        autoCapitalize='none'
-                    />
-                    <Input
-                        placeholder='Senha'
-                        secureTextEntry
+                    <Controller
+                        control={control}
+                        name='email'
+                        rules={{ required: 'Informe o e-mail' }}
+                        render={({ field: { onChange } }) => (
+                            <Input
+                                placeholder='E-mail'
+                                keyboardType='email-address'
+                                onChangeText={onChange}
+                                errorMessage={errors.email?.message}
+                                autoCapitalize='none'
+                            />
+                        )}
                     />
 
-                    <Button title='Acessar' />
+                    <Controller
+                        control={control}
+                        name='password'
+                        rules={{ required: 'Infoeme a senha' }}
+                        render={({ field: { onChange } }) => (
+                            <Input
+                                placeholder='Senha'
+                                secureTextEntry
+                                onChangeText={onChange}
+                                errorMessage={errors.email?.message}
+                                autoCapitalize='none'
+                            />
+                        )}
+                    />
+
+
+
+                    <Button title='Acessar' onPress={handleSubmit(handleSignIn)} />
 
 
                 </Center>

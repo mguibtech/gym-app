@@ -9,19 +9,22 @@ import { SignUp } from '@screens/SignUp';
 import { Routes } from '@routes/index';
 import { Home } from '@screens/Home';
 import { Profile } from '@screens/Profile';
+import { AuthContextProvider } from '@contexts/AuthContex';
 
 export default function App() {
 
-  const [fonstsLoad] = useFonts({ Roboto_400Regular, Roboto_700Bold})
+  const [fonstsLoad] = useFonts({ Roboto_400Regular, Roboto_700Bold })
 
   return (
     <NativeBaseProvider theme={THEME}>
       <StatusBar
-         barStyle="light-content"
-         backgroundColor="transparent"
-         translucent
+        barStyle="light-content"
+        backgroundColor="transparent"
+        translucent
       />
-      {fonstsLoad? <Routes/> : <Loading/>}
+      <AuthContextProvider>
+        {fonstsLoad ? <Routes /> : <Loading />}
+      </AuthContextProvider>
     </NativeBaseProvider>
   );
 }
