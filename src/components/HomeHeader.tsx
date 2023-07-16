@@ -2,14 +2,20 @@ import { HStack, Heading, Text, VStack, Icon } from "native-base";
 import { MaterialIcons } from '@expo/vector-icons'
 import { TouchableOpacity } from 'react-native'
 
+import userAvatarDefault from '@assets/userPhotoDefault.png';
+
 import { UserPhoto } from "./UserPhoto";
+import { useAuth } from "@hooks/useAuth";
 
 
 export function HomeHeader() {
+
+    const {user, signOut} = useAuth();
+
     return (
         <HStack background='gray.600' pt={16} pb={5} px={8} alignItems='center'>
             <UserPhoto
-                source={{ uri: 'https://github.com/mguibtech.png' }}
+                source={ user.avatar ?  { uri: user.avatar } : userAvatarDefault}
                 alt="Imagem do usuário"
                 mr={4}
                 size={16}
@@ -20,11 +26,11 @@ export function HomeHeader() {
                 </Text>
 
                 <Heading color='gray.100' fontSize='md' fontFamily='heading'>
-                    Guibson
+                    {user.name}
                 </Heading>
             </VStack>
 
-            <TouchableOpacity>
+            <TouchableOpacity onPress={signOut}>
                 <Icon
                     as={MaterialIcons}
                     name="logout"
