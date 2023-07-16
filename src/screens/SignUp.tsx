@@ -14,6 +14,8 @@ import { api } from '@services/api';
 import axios from 'axios';
 import { Alert } from 'react-native';
 import { AppError } from '@utils/AppError';
+import { useState } from 'react';
+import { useAuth } from '@hooks/useAuth';
 
 
 type FormDataProps = {
@@ -34,8 +36,10 @@ const signUpSchema = yup.object({
 });
 
 export function SignUp() {
+  const [isLoading, setIsLoading] = useState(false)
 
   const toast = useToast();
+  const { signIn } = useAuth();
 
   const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
     resolver: yupResolver(signUpSchema),
@@ -50,13 +54,18 @@ export function SignUp() {
   async function handleSingUp({ email, name, password, password_confirm }: FormDataProps) {
 
     try{
-      const restponse = await api.post('/users', {name, email, password})
-      console.log(restponse.data);
+      setIsLoading(true)
+
+      await api.post('/users', {name, email, password})
+      // console.log(restponse.data);
+      await signIn(email, password);
+
 
     } catch(error){
+      setIsLoading(false);
+      
       const isAppError = error instanceof AppError;
       const title = isAppError ? error.message : 'Não foi possível criar a aconta. Tente novamente'
-
       toast.show({
         title,
         placement: 'top',
@@ -149,7 +158,11 @@ export function SignUp() {
             )}
           />
 
-          <Button title='Criar e acessar' onPress={handleSubmit(handleSingUp)} />
+          <Button 
+            title='Criar e acessar' 
+            onPress={handleSubmit(handleSingUp)} 
+            isLoading={isLoading}
+          />
         </Center>
 
         <Button
