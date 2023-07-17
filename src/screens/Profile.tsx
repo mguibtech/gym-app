@@ -44,7 +44,6 @@ export function Profile() {
             bgColor:'red.500'
           })
         }
-        console.log(photoInfo)
         setUserPhoto(photoSeleted.assets[0].uri)
       }
 
