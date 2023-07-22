@@ -11,6 +11,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 
 import { useAuth } from "@hooks/useAuth";
 
+import userAvatarDefault from '@assets/userPhotoDefault.png';
 
 import { ScreenHeader } from "@components/ScreenHeader";
 import { UserPhoto } from "@components/UserPhoto";
@@ -37,9 +38,9 @@ const profileSchema = yup.object({
     .nullable()
     .transform((value) => !!value ? value : null),
   confirm_password: yup.string()
-  .nullable()
-  .transform((value) => !!value ? value : null)
-  .oneOf([yup.ref('password'), null], 'A confirmação de senha não confere.')
+    .nullable()
+    .transform((value) => !!value ? value : null)
+    .oneOf([yup.ref('password'), null], 'A confirmação de senha não confere.')
 
 });
 
@@ -67,7 +68,6 @@ const profileSchema = yup.object({
 export function Profile() {
 
   const [photoIsLoading, setPhotoIsLoading] = useState(false);
-  const [userPhoto, setUserPhoto] = useState('https://github.com/mguibtech.png')
   const [isUpadating, setIsUpdating] = useState(false)
 
   const toast = useToast();
@@ -116,11 +116,15 @@ export function Profile() {
         const userPhotoUploadForm = new FormData();
         userPhotoUploadForm.append('avatar', photoFile);
 
-        await api.patch('/users/avatar', userPhotoUploadForm, {
+        const avatarUpdatedResponse = await api.patch('/users/avatar', userPhotoUploadForm, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
         });
+
+        const userUpdated = user;
+        userUpdated.avatar = avatarUpdatedResponse.data.avatar;
+        updateUserProfile(userUpdated)
 
         toast.show({
           title: 'Foto atualizada.',
@@ -190,7 +194,10 @@ export function Profile() {
               />
               :
               <UserPhoto
-                source={{ uri: userPhoto }}
+                source={
+                  user.avatar
+                    ? { uri: `${api.defaults.baseURL}/avatar/${user.avatar}` }
+                    : userAvatarDefault}
                 alt="Foto do usuário"
                 size={PHOTO_SIZE}
               />
