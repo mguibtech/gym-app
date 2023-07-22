@@ -16,6 +16,8 @@ import { ScreenHeader } from "@components/ScreenHeader";
 import { UserPhoto } from "@components/UserPhoto";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
+import { api } from "@services/api";
+import { AppError } from "@utils/AppError";
 
 const PHOTO_SIZE = 33
 
@@ -29,18 +31,49 @@ type FormDataProps = {
 
 const profileSchema = yup.object({
   name: yup.string().required('Informe o nome.'),
-})
+  password: yup
+    .string()
+    .min(6, 'A senha deve ter pelo menos 6 dígitos.')
+    .nullable()
+    .transform((value) => !!value ? value : null),
+  confirm_password: yup.string()
+  .nullable()
+  .transform((value) => !!value ? value : null)
+  .oneOf([yup.ref('password'), null], 'A confirmação de senha não confere.')
 
+});
+
+// const profileSchema = yup.object({
+//   name: yup
+//     .string()
+//     .required('Informe o nome'),
+//   password: yup
+//     .string()
+//     .min(6, 'A senha deve ter pelo menos 6 dígitos.')
+//     .nullable()
+//     .transform((value) => !!value ? value : null),
+//   confirm_password: yup
+//     .string()
+//     .oneOf([yup.ref('password'), null], 'A confirmação de senha não confere.')
+//     .when('password', {
+//       is: (Field: any) => Field, 
+//       then: yup
+//         .string()
+//         .nullable()
+//         .required('Informe a confirmação da senha.')
+//         .transform((value) => !!value ? value : null)
+//     }),
+// })
 export function Profile() {
 
   const [photoIsLoading, setPhotoIsLoading] = useState(false);
   const [userPhoto, setUserPhoto] = useState('https://github.com/mguibtech.png')
+  const [isUpadating, setIsUpdating] = useState(false)
 
   const toast = useToast();
-  const { user } = useAuth();
+  const { user, updateUserProfile } = useAuth();
 
-  console.log(user)
-  const { control, handleSubmit, formState:{errors}} = useForm<FormDataProps>({
+  const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
     defaultValues: {
       name: user.name,
       email: user.email
@@ -72,7 +105,29 @@ export function Profile() {
             bgColor: 'red.500'
           })
         }
-        setUserPhoto(photoSeleted.assets[0].uri)
+
+        const fileExtension = photoSeleted.assets[0].uri.split('.').pop();
+        const photoFile = {
+          name: `${user.name}.${fileExtension}`.toLowerCase(),
+          uri: photoSeleted.assets[0].uri,
+          type: `${photoSeleted.assets[0].type}/${fileExtension}`
+        } as any;
+
+        const userPhotoUploadForm = new FormData();
+        userPhotoUploadForm.append('avatar', photoFile);
+
+        await api.patch('/users/avatar', userPhotoUploadForm, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        toast.show({
+          title: 'Foto atualizada.',
+          placement: 'top',
+          bgColor: 'green.500'
+        })
+        // setUserPhoto(photoSeleted.assets[0].uri)
       }
 
     } catch (error) {
@@ -82,8 +137,39 @@ export function Profile() {
     }
   }
 
-  async function handleProfileUpdate(data: FormDataProps){
-    console.log(data)
+  async function handleProfileUpdate(data: FormDataProps) {
+
+    console.log('Dados informados ==> ', data)
+    try {
+      setIsUpdating(true)
+
+      const userUpdated = user;
+      userUpdated.name = data.name;
+
+      await api.put('/users', data);
+
+      await updateUserProfile(userUpdated)
+
+      toast.show({
+        title: 'Perfil atualizado com sucesso!',
+        placement: 'top',
+        bgColor: 'green.500'
+      })
+
+    } catch (error) {
+      const isAppErro = error instanceof AppError;
+      const title = isAppErro ? error.message : 'Nao foi poss[ivel atualizar os dados. Tente novamente mais tarde.'
+
+      toast.show({
+        title,
+        placement: 'top',
+        bgColor: 'red.500'
+      })
+      console.log(error)
+    } finally {
+      setIsUpdating(false)
+    }
+
   }
 
   return (
@@ -202,6 +288,7 @@ export function Profile() {
           <Button
             title="Atualizar"
             onPress={handleSubmit(handleProfileUpdate)}
+            isLoading={isUpadating}
           />
         </VStack>
 
