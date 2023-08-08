@@ -57,7 +57,6 @@ export function SignUp() {
       setIsLoading(true)
 
       await api.post('/users', {name, email, password})
-      // console.log(restponse.data);
       await signIn(email, password);
 
 

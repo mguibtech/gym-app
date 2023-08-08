@@ -32,7 +32,6 @@ export function Exercise() {
   const route = useRoute();
 
   const { exerciseId } = route.params as RoutesParamsProps;
-  console.log("ID => " + exerciseId)
 
   function handleGoBack() {
     navigation.goBack()
