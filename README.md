@@ -50,16 +50,11 @@ Projeto desenvolvido durante a especialiação da [Rocketseat](https://www.rocke
 O layout da aplicação está disponível no Figma:
 Por conta do sistema ser responsível, o mesmo adaptabilidade para diferentes tamanhos de interface.
 
-### Web
-<p align="center">
-  <img alt="NextLevelWeek" title="#NextLevelWeek" src="src/assets/Capa.png" width="700px">
-</p>
 
 ### Mobile
 
 <p align="center">
-  <img alt="NextLevelWeek" title="#NextLevelWeek" src="src/assets/Mobile _ Feed.png" width="300px">
- <img alt="NextLevelWeek" title="#NextLevelWeek" src="src/assets/Mobile _ Aviso Modal.png" width="300px">
+ <img alt="NextLevelWeek" title="#NextLevelWeek" src="src/assets/Capa.png" width="300px">
 </p>
 
 ---
